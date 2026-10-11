@@ -1,38 +1,71 @@
 
-const themeBtn = document.getElementById("themeBtn");
-const menuBtn = document.getElementById("menuBtn");
-const navLinks = document.getElementById("navLinks");
-const year = document.getElementById("year");
+const skills = ["html", "css", "js", "python", "git", "vercel"];
 
-// Saytning hozirgi yilini ko'rsatish
-year.textContent = new Date().getFullYear();
+skills.forEach((name) => {
+  const slider = document.getElementById(`${name}-range`);
+  const value = document.getElementById(`${name}-value`);
+  const bar = document.getElementById(`${name}-bar`);
 
-// Dark va light mode
-themeBtn.addEventListener("click", () => {
+  if (!slider || !value || !bar) return;
+
+  let saved = null;
+
+  try {
+    saved = localStorage.getItem(`javohir-skill-${name}`);
+  } catch {}
+
+  if (saved !== null && saved !== "" && Number.isFinite(Number(saved))) {
+    slider.value = Math.max(0, Math.min(100, Number(saved)));
+  }
+
+  function updateSkill() {
+    const percent = Number(slider.value);
+
+    value.textContent = `${percent}%`;
+    bar.style.width = `${percent}%`;
+
+    try {
+      localStorage.setItem(`javohir-skill-${name}`, percent);
+    } catch {}
+  }
+
+  slider.addEventListener("input", updateSkill);
+  updateSkill();
+});
+
+// Dark / Light mode
+const themeButton = document.getElementById("theme-toggle");
+
+let savedTheme = null;
+
+try {
+  savedTheme = localStorage.getItem("javohir-theme");
+} catch {}
+
+if (savedTheme === "light") {
+  document.body.classList.add("light");
+}
+
+function updateThemeButton() {
+  themeButton.textContent =
+    document.body.classList.contains("light") ? "🌙" : "☀️";
+}
+
+updateThemeButton();
+
+themeButton.addEventListener("click", () => {
   document.body.classList.toggle("light");
 
-  const isLight = document.body.classList.contains("light");
-  themeBtn.textContent = isLight ? "🌙" : "☀️";
-  themeBtn.setAttribute(
-    "aria-label",
-    isLight ? "Qorong'i rejimga o'tish" : "Yorug' rejimga o'tish"
-  );
+  const theme = document.body.classList.contains("light")
+    ? "light"
+    : "dark";
+
+  try {
+    localStorage.setItem("javohir-theme", theme);
+  } catch {}
+
+  updateThemeButton();
 });
 
-// Telefonda navigatsiya menyusi
-menuBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("open");
-
-  const isOpen = navLinks.classList.contains("open");
-  menuBtn.textContent = isOpen ? "✕" : "☰";
-  menuBtn.setAttribute("aria-expanded", String(isOpen));
-});
-
-// Menyudan bo'lim tanlanganda menyuni yopish
-navLinks.querySelectorAll("a").forEach((link) => {
-  link.addEventListener("click", () => {
-    navLinks.classList.remove("open");
-    menuBtn.textContent = "☰";
-    menuBtn.setAttribute("aria-expanded", "false");
-  });
-});
+// Current year
+document.getElementById("year").textContent = new Date().getFullYear();
